@@ -41,7 +41,7 @@ This guide provides instructions on integrating the DeepSeek-R1 model with the C
    - Register the model with Ollama by running the following command in your terminal:
 
      ```bash
-     ollama create DeepSeek-R1-14B-Q4_K_M -f DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.model
+     ollama create DeepSeek-R1-14B-Q4_K_M_cline -f DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.model
      ```
 
    - Start the Ollama server:
