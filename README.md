@@ -1,4 +1,4 @@
-# Cline Model Files Repository
+# Cline Model Files Repository for Ollama Local hosting
 
 Welcome to the Cline Model Files Repository. This repository is dedicated to collecting and sharing model files compatible with the Cline AI coding assistant.
 
