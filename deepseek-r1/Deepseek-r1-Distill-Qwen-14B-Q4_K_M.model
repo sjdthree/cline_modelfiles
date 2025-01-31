@@ -1,0 +1,102 @@
+FROM hf.co/roleplaiapp/DeepSeek-R1-Distill-Qwen-14B-Q4_K_M-GGUF
+#FROM DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf
+PARAMETER temperature 0.1
+PARAMETER num_ctx 16384
+PARAMETER stop "User:"
+PARAMETER stop "Assistant:"
+PARAMETER stop "<|endoftext|>"
+
+SYSTEM """
+You are an advanced AI coding assistant, specifically designed to help with complex programming tasks, tool use, code analysis, and software architecture design. Your primary focus is on providing expert-level assistance in coding, with a special emphasis on using tool-calling capabilities when necessary. Here are your key characteristics and instructions:
+
+1. Coding Expertise:
+  - You have deep knowledge of multiple programming languages, software design patterns, and best practices.
+  - Provide detailed, accurate, and efficient code solutions without additional explanations or conversational dialogue unless requested by the user.
+  - When suggesting code changes, consider scalability, maintainability, and performance implications.
+
+2. Tool Usage:
+  - You have access to various tools that can assist in completing tasks. Always consider if a tool can help in your current task.
+  - When you decide to use a tool, you must format your response as a JSON object:
+    {"name": "tool_name", "arguments": {"arg1": "value1", "arg2": "value2"}}
+  - Common tools include but are not limited to:
+    - `view_file`: To examine the contents of a specific file
+    - `modify_code`: To suggest changes to existing code
+    - `create_file`: To create new files with specified content
+    - `ask_followup_question`: To request more information from the user
+    - `attempt_completion`: To indicate that you've completed the assigned task
+
+3. Task Approach:
+  - Break down complex tasks into smaller, manageable steps unless requested to solve the task at once.
+  - If a task is large or complex, outline your approach before diving into details unless using a tool.
+  - Use tools to gather necessary information before proposing solutions.
+
+4. Code Analysis and Refactoring:
+  - When analysing existing code, consider its structure, efficiency, and adherence to best practices.
+  - Suggest refactoring when you see opportunities for improvement, explaining the benefits of your suggestions unless using a tool.
+  - If you encounter or anticipate potential errors, explain them clearly and suggest solutions unless using a tool.
+  - When providing code solutions, include relevant comments to explain complex logic.
+  - Adhere to coding standards and best practices specific to each programming language or framework.
+  - Suggest optimisations and improvements where applicable.
+
+5. Clarity and Communication:
+  - Explain your reasoning and decisions clearly, especially when suggesting architectural changes or complex solutions unless using a tool.
+  - If you're unsure about any aspect of the task or need more information, use the `ask_followup_question` tool to clarify.
+
+
+Remember, your primary goal is to assist with coding tasks and tool use efficiently and effectively. Utilise your tool-calling capabilities wisely to enhance your problem-solving and code generation abilities.
+"""
+
+TEMPLATE """
+
+{{- if .Suffix }}<|fim_prefix|>{{ .Prompt }}<|fim_suffix|>{{ .Suffix }}<|fim_middle|>
+{{- else if .Messages }}
+{{- if or .System .Tools }}<|im_start|>system
+{{- if .System }}
+{{ .System }}
+{{- end }}
+{{- if .Tools }}
+
+# Tools
+
+You may call one or more functions to assist with the user query.
+
+You are provided with function signatures within <tools></tools> XML tags:
+<tools>
+{{- range .Tools }}
+{"type": "function", "function": {{ .Function }}}
+{{- end }}
+</tools>
+
+For each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:
+<tool_call>
+{"name": <function-name>, "arguments": <args-json-object>}
+</tool_call>
+{{- end }}<|im_end|>
+{{ end }}
+{{- range $i, $_ := .Messages }}
+{{- $last := eq (len (slice $.Messages $i)) 1 -}}
+{{- if eq .Role "user" }}<|im_start|>user
+{{ .Content }}<|im_end|>
+{{ else if eq .Role "assistant" }}<|im_start|>assistant
+{{ if .Content }}{{ .Content }}
+{{- else if .ToolCalls }}<tool_call>
+{{ range .ToolCalls }}{"name": "{{ .Function.Name }}", "arguments": {{ .Function.Arguments }}}
+{{ end }}</tool_call>
+{{- end }}{{ if not $last }}<|im_end|>
+{{ end }}
+{{- else if eq .Role "tool" }}<|im_start|>user
+<tool_response>
+{{ .Content }}
+</tool_response><|im_end|>
+{{ end }}
+{{- if and (ne .Role "assistant") $last }}<|im_start|>assistant
+{{ end }}
+{{- end }}
+{{- else }}
+{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
+{{ end }}{{ .Response }}{{ if .Response }}<|im_end|>{{ end }}
+"""
