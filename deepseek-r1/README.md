@@ -2,6 +2,32 @@
 
 This guide provides instructions on integrating the DeepSeek-R1 model with the Cline AI coding assistant, enabling local AI-driven coding assistance without relying on external APIs.
 
+**REALLY IMPORTANT FACT:** If you plan to run Ollama with code generation, follow these steps to move the default context window from 2048 to 8192. By default, Ollama uses a context window size of 2048 tokens.
+
+This can be overridden with the `OLLAMA_CONTEXT_LENGTH` environment variable. For example, to set the default context window to 8K, use:
+
+```bash
+OLLAMA_CONTEXT_LENGTH=8192 ollama serve
+```
+
+To change this when using `ollama run`, use the `/set` parameter:
+
+```bash
+/set parameter num_ctx 4096
+```
+
+When using the API, specify the `num_ctx` parameter:
+
+```bash
+curl http://localhost:11434/api/generate -d '{
+  "model": "llama3.2",
+  "prompt": "Why is the sky blue?",
+  "options": {
+    "num_ctx": 4096
+  }
+}'
+```
+
 ## Prerequisites
 
 - **Software:**
