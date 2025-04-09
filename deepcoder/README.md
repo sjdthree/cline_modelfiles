@@ -44,6 +44,19 @@ curl http://localhost:11434/api/generate -d '{
   }
 }'
 ```
+### Pull the deepcoder model that fits your machine
+
+14b = 9GB file size
+```bash
+ollama run deepcoder
+```
+1.5b = 1.1GB file size
+```bash
+ollama run deepcoder:1.5b
+```
+### Configure in RooCode or Cline with 
+localhost:11434 
+and select the deepcoder model
 
 ---
 
