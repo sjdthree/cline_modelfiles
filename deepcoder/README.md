@@ -30,7 +30,7 @@ OLLAMA_CONTEXT_LENGTH=8192 ollama serve
 To change this when using `ollama run`, use the `/set` parameter:
 
 ```bash
-/set parameter num_ctx 4096
+/set parameter num_ctx 8192
 ```
 
 When using the API, specify the `num_ctx` parameter:
@@ -40,7 +40,7 @@ curl http://localhost:11434/api/generate -d '{
   "model": "llama3.2",
   "prompt": "Why is the sky blue?",
   "options": {
-    "num_ctx": 4096
+    "num_ctx": 8192
   }
 }'
 ```
